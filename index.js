@@ -19,6 +19,11 @@ app.get("/", (req, res) => {
     process.env.REDIRECT_URL 
   );
 
+  const calendar =  google.calendar({
+    version:"v3",
+    auth:process.env.API_KEY,
+  })
+
   // generate a url that asks permissions for  Google Calendar scopes
 const scopes = [
     'https://www.googleapis.com/auth/calendar',
@@ -43,6 +48,43 @@ const {tokens} = await oauth2Client.getToken(code)
 oauth2Client.setCredentials(tokens);
 
     res.send({msg:"Its working",token:tokens})
+})
+
+app.get("/schedule_event",async (req,res)=>{
+    const event = {
+        'summary': 'Create test',
+        'location': 'Akshaya Today',
+        'description': 'A chance to hear more about Google\'s developer products.',
+        'start': {
+          'dateTime': '2024-04-13T09:00:00-07:00',
+          'timeZone': 'Asia/Kolkata',
+        },
+        'end': {
+          'dateTime': '2024-04-13T17:00:00-07:00',
+          'timeZone': 'Asia/Kolkata',
+        },
+        'recurrence': [
+          'RRULE:FREQ=DAILY;COUNT=2'
+        ],
+        'attendees': [
+          {'email': 'chandrasekaran2996@gmail.com'},
+          {'email': 'chandrasekaran@guvi.in'},
+        ],
+        'reminders': {
+          'useDefault': false,
+          'overrides': [
+            {'method': 'email', 'minutes': 24 * 60},
+            {'method': 'popup', 'minutes': 10},
+          ],
+        },
+      };
+    let result= await calendar.events.insert({
+        calendarId:"primary",
+        auth:oauth2Client,
+        requestBody:event
+
+    })
+    res.send({msg:"created"});
 })
  
 app.listen(port,()=>{
