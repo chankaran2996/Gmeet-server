@@ -34,10 +34,15 @@ app.get("/google",(req,res)=>{
     res.redirect(url);
 });
 
-app.get("/google/redirect",(req,res)=>{
+app.get("/google/redirect",async (req,res)=>{
     // console.log(req.query);
-    const token = req.query.code;
-    res.send("Its working")
+    const code = req.query.code;
+    // This will provide an object with the access_token and refresh_token.
+// Save these somewhere safe so they can be used at a later time.
+const {tokens} = await oauth2Client.getToken(code)
+oauth2Client.setCredentials(tokens);
+
+    res.send({msg:"Its working",token:tokens})
 })
  
 app.listen(port,()=>{
